@@ -39,3 +39,16 @@ export async function actionBarInput(options: ActionBarInputOptions) {
     }
     return (input);
 }
+
+export interface ActionBarYNOptions {
+    label: string;
+    ynFieldOptions: any;
+}
+
+export async function actionBarYN(options: ActionBarYNOptions) {
+    term.eraseArea(1, term.height - 1, term.width, 2);
+    term.moveTo(2, term.height - 1, options.label);
+    const value = await term.yesOrNo(options.ynFieldOptions).promise;
+    term.eraseArea(1, term.height - 1, term.width, 2);
+    return (value);
+}

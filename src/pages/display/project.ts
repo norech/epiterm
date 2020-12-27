@@ -1,5 +1,5 @@
 import { terminal as term } from  'terminal-kit' ;
-import { clearActionBar, showActionBarError } from '../../components/actionBar';
+import { actionBarYN, clearActionBar, showActionBarError } from '../../components/actionBar';
 import { loader } from '../../components/loader';
 import { get } from '../../intra';
 import { Session } from '../../session';
@@ -18,7 +18,7 @@ export async function displayProject(session: Session, state: State, projectUrl,
 {
     const { data: project } = await loader(() => get(session, projectUrl));
     const userGroup = project.registered.find(r => r.code == project.user_project_code);
-    const isRegistered = project.instance_registered == "1";
+    const isRegistered = userGroup != undefined;
 
     let groupMembers = "";
     if (userGroup != undefined) {
@@ -33,8 +33,8 @@ export async function displayProject(session: Session, state: State, projectUrl,
         [ project.type_title, project.title ],
         [ 'Module', project.module_title ],
         [ 'Description', activity.description ],
-        [ 'État des inscriptions', project.register ? "^gOUVERTES" : "^rFERMÉES" ],
-        [ 'Inscrit', isRegistered ? "^gOUI" : "^rNON" ],
+        [ 'État des inscriptions', project.closed ? "^rFERMÉES" : "^gOUVERTES" ],
+        [ 'Inscrit', isRegistered ? (project.user_project_status == "project_confirmed" ? "^gOUI" : "^bEN ATTENTE") : "^rNON" ],
         [ 'Date', "Du " + activity.begin + " au " + activity.end],
         [ 'Groupe', project.user_project_title == null ? "^rSans groupe" : project.user_project_title + "\n\n" + groupMembers],
     ], {
@@ -64,9 +64,20 @@ export async function displayProject(session: Session, state: State, projectUrl,
                 }
                 break;
             case "r":
-                if (project.register == "0") {
+                if (!project.register) {
                     showActionBarError("Les inscriptions sont fermées pour ce projet.");
                     return;
+                }
+                const actionTitle = isRegistered ? "désinscrire" : "inscrire";
+
+
+                const doContinue = await actionBarYN({
+                    label: "Voulez-vous vraiment vous " + actionTitle + " à ce projet ? (y/N)",
+                    ynFieldOptions: { yes: [ 'y' ] , no: [ 'n', 'ENTER' ] }
+                });
+                if (!doContinue) {
+                    showActionBarError("Action annulée.");
+                    break;
                 }
                 showActionBarError("Cette fonctionnalité n'est pas encore disponible.");
                 break;
