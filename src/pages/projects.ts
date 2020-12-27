@@ -33,21 +33,27 @@ export async function projects(session: Session, state: State)
     const visibleProjects = projects.filter(p => !p.is_hidden);
 
     term.table([
-        [ 'Projet ', 'Inscrit ', 'Début ', 'Fin ', 'Timeline ' ],
+        [ 'Projet ', ' ', ' ' ],
         ...visibleProjects.map(projet => {
             const timeline_percent = parseFloat(projet.timeline_barre);
-            let register_state = projet.date_inscription == false ? "^gINSCRIT" : "^rNON INSCRIT ^w(" + projet.date_inscription + ")";
+            let register_state = projet.date_inscription == false ? "" : "^rNON INSCRIT ^w(" + projet.date_inscription + ")";
             let timeline_start = projet.timeline_start;
             let timeline_end = projet.timeline_end;
-            let timeline = (Math.round(timeline_percent * 100) / 100).toFixed(2) + "%";
+            let timeline = "-";
+            let timelinePercentage = (Math.round(timeline_percent * 100) / 100).toFixed(2) + "%";
             if (term.width <= 100) {
                 register_state = register_state.split(' ^w(')[0];
                 timeline_start = timeline_start.split(',')[0];
                 timeline_end = timeline_end.split(',')[0];
             }
-            if (term.width > 100)
-                timeline = staticProgress(timeline_percent, 20) + " " + timeline;
-            return [ projet.title + " ", register_state + " ", timeline_start + " ", timeline_end + " ", timeline ]
+            let tail = "";
+            if (term.width > 120) {
+                timeline = staticProgress(timeline_percent, 20) + " ";
+            }
+            if (term.width > 140) {
+                tail = "  ^w(" + timelinePercentage + ")";
+            }
+            return [ projet.title + " ", register_state + " ", timeline_start + " " + timeline + " " + timeline_end + tail ]
         })
     ], {
         hasBorder: false,
