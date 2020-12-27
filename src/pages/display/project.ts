@@ -1,7 +1,8 @@
+import { stringify } from 'querystring';
 import { terminal as term } from  'terminal-kit' ;
-import { actionBarYN, clearActionBar, showActionBarError } from '../../components/actionBar';
+import { actionBarYN, clearActionBar, showActionBarError, showActionBarInfo } from '../../components/actionBar';
 import { loader } from '../../components/loader';
-import { get } from '../../intra';
+import { get, post } from '../../intra';
 import { Session } from '../../session';
 import { loadPage, State } from '../../state';
 import { displayFiles } from './files';
@@ -64,7 +65,7 @@ export async function displayProject(session: Session, state: State, projectUrl,
                 }
                 break;
             case "r":
-                if (!project.register) {
+                if (project.closed) {
                     showActionBarError("Les inscriptions sont fermées pour ce projet.");
                     return;
                 }
@@ -77,10 +78,27 @@ export async function displayProject(session: Session, state: State, projectUrl,
                 });
                 if (!doContinue) {
                     showActionBarError("Action annulée.");
+                    showKeymap(isRegistered);
                     break;
                 }
-                showActionBarError("Cette fonctionnalité n'est pas encore disponible.");
-                break;
+                try {
+                    if (isRegistered) {
+                        if (!project.user_project_master) {
+                            showActionBarError("Cette fonctionnalité n'est pas encore disponible. Vous devez être chef de groupe pour quitter un groupe.");
+                            return;
+                        }
+                        showActionBarInfo("Destruction du groupe...");
+                        await post(session, projectUrl + "destroygroup", { code: project.user_project_code });
+                    } else {
+                        showActionBarInfo("Inscription au projet...");
+                        await post(session, projectUrl + "register/");
+                    }
+                } catch (ex) {
+                    showActionBarError("Impossible de vous " + actionTitle + ": " + ex);
+                    showKeymap(isRegistered);
+                    return;
+                }
+                return loadPage(displayProject, session, state, projectUrl, activity);
         }
 
     };
