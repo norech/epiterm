@@ -5,7 +5,13 @@ export function clearActionBar(clearErrors: boolean) {
 }
 
 export function showActionBarError(message) {
+    term.eraseArea(0, term.height, term.width, 1);
     term.bgRed.white.moveTo(2, term.height, message);
+}
+
+export function showActionBarInfo(message) {
+    term.eraseArea(0, term.height, term.width, 1);
+    term.moveTo(2, term.height, message);
 }
 
 export interface ActionBarInputOptions {

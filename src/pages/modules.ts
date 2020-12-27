@@ -3,7 +3,7 @@ import { clearActionBar, actionBarInput, showActionBarError } from '../component
 import { loader } from '../components/loader';
 import { getDashboard, getModules } from "../intra";
 import { Session } from '../session';
-import { State } from '../state';
+import { loadPage, State } from '../state';
 
 const showKeymap = () => {
     clearActionBar(false);

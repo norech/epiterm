@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { createWriteStream } from 'fs';
 import { recreateSession } from './session';
 
 const base_url = "https://intra.epitech.eu";
@@ -52,4 +53,21 @@ export async function getImage(session, path)
     });
 
     return ("data:image/jpeg;base64," + Buffer.from(res.data, 'binary').toString('base64'));
+}
+
+export async function downloadFile(session, path, localPath)
+{ 
+    const writer = createWriteStream(localPath)
+      
+    const response = await axios.get(base_url + path, {
+        headers: { cookie: session.cookie, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' },
+        responseType: 'stream'
+    });
+      
+    response.data.pipe(writer);
+      
+    return new Promise((resolve, reject) => {
+        writer.on('finish', resolve)
+        writer.on('error', reject)
+    });
 }

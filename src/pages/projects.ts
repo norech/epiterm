@@ -4,7 +4,8 @@ import { loader } from '../components/loader';
 import { getDashboard, get } from "../intra";
 import { Session } from '../session';
 import { actionBarInput, clearActionBar, showActionBarError } from '../components/actionBar';
-import { State } from '../state';
+import { loadPage, State } from '../state';
+import { displayProject } from './display/project';
 
 const showKeymap = () => {
     clearActionBar(false);
@@ -17,25 +18,33 @@ export async function projects(session: Session, state: State)
     const { data } = await loader(async () => {
         const dashboard = await getDashboard(session);
         let promises = [];
-        dashboard.data.board.projets = dashboard.data.board.projets.filter(p => parseFloat(p.timeline_barre) < 100);
         let projets = dashboard.data.board.projets;
 
         for (const i in projets) {
             const projet = projets[i];
+            if (parseFloat(projet.timeline_barre) >= 100) {
+                projet.is_hidden = true;
+                continue;
+            }
+            projet.is_hidden = false;
             promises.push((async () => {
                 const { data } = await get(session, projet.title_link);
                 if (data.register == "1")
                     projet.not_registered = true;
                 projet.is_note = data.is_note;
+                projet.is_projet = data.is_projet;
+                projet.activity = data;
             })());
         }
         await Promise.all(promises);
         return (dashboard);
     });
+    const projects = data.board.projets.filter(p => p.is_projet);
+    const visibleProjects = projects.filter(p => !p.is_hidden);
 
     term.table([
         [ 'Projet ', 'Inscrit ', 'Fin d\'inscription ', 'Début ', 'Fin ', 'Timeline ' ],
-        ...data.board.projets.map(projet => {
+        ...visibleProjects.map(projet => {
             const note_state = projet.is_note ? " ^b⏺": "";
             const timeline_percent = parseFloat(projet.timeline_barre);
             const register_state = projet.not_registered ? "^rNON INSCRIT" : "^gINSCRIT";
@@ -67,7 +76,7 @@ export async function projects(session: Session, state: State)
     } );
     showKeymap();
 
-    const projectNames = data.board.projets.map(projet => projet.title);
+    const projectNames = projects.map(projet => projet.title);
 
     state.onKeyPress = async (key) => {
         if (key.toLowerCase() != "s") return;
@@ -93,7 +102,13 @@ export async function projects(session: Session, state: State)
             showKeymap();
             return;
         }
-        showActionBarError("Cette fonctionnalité n'est pas encore disponible.");
-        showKeymap();
+        const project = projects.find(p => p.title == input);
+
+        if (typeof project.activity === "undefined") {
+            const { data } = await loader(() => get(session, project.title_link));
+            project.activity = data;
+        }
+
+        return loadPage(displayProject, session, state, project.title_link + "project/", project.activity);
     };
 }
