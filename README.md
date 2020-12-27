@@ -8,6 +8,8 @@ Interface interactive de terminal pour l'intranet Epitech.
  * Aperçu des projets actifs (état d'inscription, timeline)
  * Aperçu des modules (état d'inscription, validation, grades)
  * Aperçu du profil (netsoul, crédits, G.P.A)
+ * Aperçu individuel des projets
+ * Téléchargement des fichiers des projets
 
 ## Installation
 
