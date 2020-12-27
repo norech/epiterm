@@ -4,8 +4,9 @@ import { loader } from '../components/loader';
 import { getDashboard, get } from "../intra";
 import striptags from "striptags";
 import moment from "moment";
+import { Session } from '../session';
 
-export async function logs(session, state)
+export async function logs(session: Session, state)
 {
     const { data } = await loader(() => getDashboard(session));
 

@@ -2,6 +2,7 @@ import { terminal as term } from  'terminal-kit' ;
 import { staticProgress } from '../components/staticProgress';
 import { loader } from '../components/loader';
 import { getDashboard, get } from "../intra";
+import { Session } from '../session';
 
 const showKeymap = () => {
     term.eraseArea(1, term.height - 1, term.width, 1);
@@ -9,7 +10,7 @@ const showKeymap = () => {
     term(" Sélectionner");
 }
 
-export async function projects(session, state)
+export async function projects(session: Session, state)
 {
     const { data } = await loader(async () => {
         const dashboard = await getDashboard(session);

@@ -1,16 +1,19 @@
 import { terminal as term } from  'terminal-kit' ;
 import { loader } from '../components/loader';
-import { getPlanning } from "../intra";
+import { getPlanning, getUser } from "../intra";
 import moment from 'moment';
+import { Session } from '../session';
 
-export async function planning(session, state) {
+export async function planning(session: Session, state) {
     const activities = await loader(async () => {
         const today = new Date()
         const later = new Date(today)
         later.setDate(later.getDate() + 7)
-
         const planning = await getPlanning(session, today.toISOString().split('T')[0], later.toISOString().split('T')[0]);
-        return (planning.data.filter((p) => p.instance_location === session.city && !session.ignored_modules_from_planning.includes(p.titlemodule)).sort((pa, pb) => moment(pa.start).diff(pb.start)));
+        
+        if (typeof session.ignored_modules_from_planning === "undefined")
+            session.ignored_modules_from_planning = [];
+        return (planning.data.filter((p) => p.instance_location === session.user.location && !session.ignored_modules_from_planning.includes(p.titlemodule)).sort((pa, pb) => moment(pa.start).diff(pb.start)));
     });
 
     term.table([

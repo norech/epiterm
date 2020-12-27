@@ -1,6 +1,7 @@
 import { terminal as term } from  'terminal-kit' ;
 import { loader } from '../components/loader';
 import { getDashboard, getModules } from "../intra";
+import { Session } from '../session';
 
 const showKeymap = () => {
     term.eraseArea(1, term.height - 1, term.width, 1);
@@ -8,7 +9,7 @@ const showKeymap = () => {
     term(" Sélectionner");
 }
 
-export async function modules(session, state)
+export async function modules(session: Session, state)
 {
     const { data } = await loader(async () => {
         let modules = await getModules(session);
