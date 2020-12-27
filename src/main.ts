@@ -75,7 +75,7 @@ async function init()
 
 		term("\n")
 		term.bold("Voulez-vous enregistrer votre lien d'autologin et votre session? (y/N)");
-		const saveSession = await term.yesOrNo( { yes: [ 'y' ] , no: [ 'n', 'ENTER' ] }).promise;
+		const saveSession = await term.yesOrNo( { yes: [ 'y', 'Y' ] , no: [ 'n', 'N', 'ENTER' ] }).promise;
 		if (!saveSession) {
 			session.dont_save_session = true;
 		}

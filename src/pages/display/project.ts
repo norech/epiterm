@@ -74,7 +74,7 @@ export async function displayProject(session: Session, state: State, projectUrl,
 
                 const doContinue = await actionBarYN({
                     label: "Voulez-vous vraiment vous " + actionTitle + " à ce projet ? (y/N)",
-                    ynFieldOptions: { yes: [ 'y' ] , no: [ 'n', 'ENTER' ] }
+                    ynFieldOptions: { yes: [ 'y', 'Y' ] , no: [ 'n', 'N', 'ENTER' ] }
                 });
                 if (!doContinue) {
                     showActionBarError("Action annulée.");
