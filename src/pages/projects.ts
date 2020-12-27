@@ -3,9 +3,10 @@ import { staticProgress } from '../components/staticProgress';
 import { loader } from '../components/loader';
 import { getDashboard, get } from "../intra";
 import { Session } from '../session';
+import { actionBarInput, clearActionBar, showActionBarError } from '../components/actionBar';
 
 const showKeymap = () => {
-    term.eraseArea(1, term.height - 1, term.width, 1);
+    clearActionBar(term, false);
     term.bgWhite.black.moveTo(2, term.height - 1, "S");
     term(" Sélectionner");
 }
@@ -71,28 +72,28 @@ export async function projects(session: Session, state)
         if (key.toLowerCase() != "s") return;
         term.eraseArea(0, term.height - 1, term.width, 2);
 
-        let input;        
-        while (true) {
-            term.moveTo(2, term.height - 1, "Sélectionner un projet: ");
-            input = await term.inputField({
+        const input = await actionBarInput(term, {
+            label: "Sélectionner un projet: ", 
+            inputFieldOptions: {
                 cancelable: true,
                 autoCompleteMenu: true,
                 history: projectNames,
                 autoComplete: projectNames,
                 autoCompleteHint: true
-            }).promise;
-            term.eraseArea(1, term.height - 1, term.width, 2);
-            if (input == undefined) { // esc is pressed
-                showKeymap();
-                return;
+            },
+            validate: async (input) => {
+                const valid = projectNames.includes(input);
+                if (!valid)
+                    showActionBarError(term, "Le projet '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+                return (valid);
             }
-            if (projectNames.includes(input)) {
-                break;
-            } else {
-                term.bgRed.white.moveTo(2, term.height, "Le projet '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
-            }
+        });
+
+        if (input == undefined) {
+            showKeymap();
+            return;
         }
-        term.bgRed.white.moveTo(2, term.height, "Cette fonctionnalité n'est pas encore disponible.");
+        showActionBarError(term, "Cette fonctionnalité n'est pas encore disponible.");
         showKeymap();
     };
 }

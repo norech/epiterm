@@ -1,10 +1,11 @@
 import { terminal as term } from  'terminal-kit' ;
+import { clearActionBar, actionBarInput, showActionBarError } from '../components/actionBar';
 import { loader } from '../components/loader';
 import { getDashboard, getModules } from "../intra";
 import { Session } from '../session';
 
 const showKeymap = () => {
-    term.eraseArea(1, term.height - 1, term.width, 1);
+    clearActionBar(term, false);
     term.bgWhite.black.moveTo(2, term.height - 1, "S");
     term(" Sélectionner");
 }
@@ -69,28 +70,28 @@ export async function modules(session: Session, state)
 
     state.onKeyPress = async (key) => {
         if (key.toLowerCase() != "s") return;
-        term.eraseArea(1, term.height - 1, term.width, 2);
 
-        let input;        
-        while (true) {
-            term.moveTo(2, term.height - 1, "Sélectionner un module: ");
-            input = await term.inputField({
-                cancelable: true,
+        const input = await actionBarInput(term, {
+            label: "Sélectionner un module: ", 
+            inputFieldOptions: {
                 autoCompleteMenu: true,
                 history: moduleNames,
                 autoComplete: moduleNames,
                 autoCompleteHint: true
-            }).promise;
-            term.eraseArea(1, term.height - 1, term.width, 2);
-            if (input == undefined) // esc is pressed
-                return;
-            if (moduleNames.includes(input)) {
-                break;
-            } else {
-                term.bgRed.white.moveTo(2, term.height, "Le module '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+            },
+            validate: async (input) => {
+                const valid = moduleNames.includes(input);
+                if (!valid)
+                    showActionBarError(term, "Le module '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+                return (valid);
             }
+        });
+
+        if (input == undefined) {
+            showKeymap();
+            return;
         }
-        term.bgRed.white.moveTo(2, term.height, "Cette fonctionnalité n'est pas encore disponible.");
+        showActionBarError(term, "Cette fonctionnalité n'est pas encore disponible.");
         showKeymap();
     };
 }
