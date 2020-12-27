@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { createWriteStream } from 'fs';
+import { stringify } from 'querystring';
 import { recreateSession } from './session';
 
 const base_url = "https://intra.epitech.eu";
@@ -25,9 +26,11 @@ export async function get(session, endpoint)
 
 export async function post(session, endpoint, data?: any)
 {
+    data = data ? stringify(data) : undefined;
     if (session.cookie == undefined)
         await recreateSession(session);
-    return axios.post(base_url + endpoint + (endpoint.indexOf("?") > 0 ? "&" : "?") + "format=json", data, { headers: { cookie: session.cookie } });
+    return axios.post(base_url + endpoint + (endpoint.indexOf("?") > 0 ? "&" : "?") + "format=json", data, {
+        headers: { cookie: session.cookie, 'Content-Type': 'application/x-www-form-urlencoded' } });
 }
 
 export function getDashboard(session)
