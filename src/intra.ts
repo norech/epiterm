@@ -23,6 +23,13 @@ export async function get(session, endpoint)
     return axios.get(base_url + endpoint + (endpoint.indexOf("?") > 0 ? "&" : "?") + "format=json", { headers: { cookie: session.cookie } });
 }
 
+export async function post(session, endpoint, data?: any)
+{
+    if (session.cookie == undefined)
+        await recreateSession(session);
+    return axios.post(base_url + endpoint + (endpoint.indexOf("?") > 0 ? "&" : "?") + "format=json", data, { headers: { cookie: session.cookie } });
+}
+
 export function getDashboard(session)
 {
     return get(session, "/");
