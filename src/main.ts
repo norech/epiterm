@@ -26,7 +26,7 @@ var options = {
 var pages = {
 	'Aperçu': logs,
 	'Planning': planning,
-	'Activités': projects,
+	'Projets': projects,
 	'Modules': modules,
 	'Profil': profile,
 };
