@@ -11,7 +11,7 @@
     "build": "tsc"
   },
   "author": "Alexis Cheron (Norech) <alexis.cheron@epitech.eu>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "axios": "^0.21.0",
     "moment": "^2.29.1",
