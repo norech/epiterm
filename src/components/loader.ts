@@ -6,7 +6,7 @@ export async function loader<T>(action: () => Promise<T>, message?: string): Pro
     term( message || ' Chargement... ' );
     const data = await action();
     spinner.animate(false);
-    term.eraseLine();
+    term.clear();
     term.moveTo(1, 2);
     return data;
 }
