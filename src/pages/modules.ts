@@ -5,7 +5,7 @@ import { getDashboard, getModules } from "../intra";
 import { Session } from '../session';
 
 const showKeymap = () => {
-    clearActionBar(term, false);
+    clearActionBar(false);
     term.bgWhite.black.moveTo(2, term.height - 1, "S");
     term(" Sélectionner");
 }
@@ -71,7 +71,7 @@ export async function modules(session: Session, state)
     state.onKeyPress = async (key) => {
         if (key.toLowerCase() != "s") return;
 
-        const input = await actionBarInput(term, {
+        const input = await actionBarInput({
             label: "Sélectionner un module: ", 
             inputFieldOptions: {
                 autoCompleteMenu: true,
@@ -82,7 +82,7 @@ export async function modules(session: Session, state)
             validate: async (input) => {
                 const valid = moduleNames.includes(input);
                 if (!valid)
-                    showActionBarError(term, "Le module '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+                    showActionBarError("Le module '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
                 return (valid);
             }
         });
@@ -91,7 +91,7 @@ export async function modules(session: Session, state)
             showKeymap();
             return;
         }
-        showActionBarError(term, "Cette fonctionnalité n'est pas encore disponible.");
+        showActionBarError("Cette fonctionnalité n'est pas encore disponible.");
         showKeymap();
     };
 }

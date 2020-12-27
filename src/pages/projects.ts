@@ -6,7 +6,7 @@ import { Session } from '../session';
 import { actionBarInput, clearActionBar, showActionBarError } from '../components/actionBar';
 
 const showKeymap = () => {
-    clearActionBar(term, false);
+    clearActionBar(false);
     term.bgWhite.black.moveTo(2, term.height - 1, "S");
     term(" Sélectionner");
 }
@@ -70,9 +70,8 @@ export async function projects(session: Session, state)
 
     state.onKeyPress = async (key) => {
         if (key.toLowerCase() != "s") return;
-        term.eraseArea(0, term.height - 1, term.width, 2);
 
-        const input = await actionBarInput(term, {
+        const input = await actionBarInput({
             label: "Sélectionner un projet: ", 
             inputFieldOptions: {
                 cancelable: true,
@@ -84,7 +83,7 @@ export async function projects(session: Session, state)
             validate: async (input) => {
                 const valid = projectNames.includes(input);
                 if (!valid)
-                    showActionBarError(term, "Le projet '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+                    showActionBarError("Le projet '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
                 return (valid);
             }
         });
@@ -93,7 +92,7 @@ export async function projects(session: Session, state)
             showKeymap();
             return;
         }
-        showActionBarError(term, "Cette fonctionnalité n'est pas encore disponible.");
+        showActionBarError("Cette fonctionnalité n'est pas encore disponible.");
         showKeymap();
     };
 }
