@@ -37,6 +37,11 @@ async function init()
 
 	axios.interceptors.response.use(null, (error) => {
 		if (error.config && error.response && error.response.status === 403) {
+			if (error.config.retries && error.config.retries > 5)
+				return Promise.reject(error);
+			if (typeof error.config.retries == "undefined")
+				error.config.retries = 0;
+			error.config.retries++;
 			recreateSession(session);
 			error.config.headers.cookie = session.cookie;
 			return axios.request(error.config);
