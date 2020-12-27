@@ -10,6 +10,8 @@ Interface interactive de terminal pour l'intranet Epitech.
  * Aperçu du profil (netsoul, crédits, G.P.A)
  * Aperçu individuel des projets
  * Téléchargement des fichiers des projets
+ * Inscription aux projets (pour l'instant limité aux groupes à une personne)
+ * Désinscription aux projets (si chef de groupe uniquement)
 
 ## Installation
 
