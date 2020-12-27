@@ -13,5 +13,5 @@ export async function loadPage(page: Page, session: Session, state: State, ...ar
     term.moveTo(1, 2);
 	state.onKeyPress = undefined;
 	term.grabInput(false);
-	await page(session, state, ...args);
+	return page(session, state, ...args);
 }

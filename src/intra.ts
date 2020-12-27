@@ -7,11 +7,11 @@ const base_url = "https://intra.epitech.eu";
 
 export async function authAutologin(autologinLink)
 {
-    const res = await axios.get(autologinLink, {
+    const res: any = await axios.get(autologinLink, {
         maxRedirects: 0,
         headers: { 'Accept': '*/*' },
         withCredentials: true
-    }).catch(err => err);
+    });
     const cookies = res.response.headers['set-cookie'];
     
     return(cookies.filter(c => c.indexOf("user") == 0)[0]);

@@ -1,4 +1,4 @@
-import { terminal as term } from  'terminal-kit' ;
+import { terminal as term } from  'terminal-kit';
 import { getSession, recreateSession } from "./session"
 import axios from "axios";
 import moment from 'moment';
@@ -8,6 +8,7 @@ import { planning } from './pages/planning';
 import { logs } from './pages/logs';
 import { modules } from './pages/modules';
 import { loadPage } from './state';
+import { logo } from './components/logo';
 
 const pkg = require("../package.json");
 term.fullscreen(true);
@@ -35,14 +36,14 @@ async function init()
 {
 	const session = await getSession();
 
-	axios.interceptors.response.use(null, (error) => {
+	axios.interceptors.response.use(null, async (error) => {
 		if (error.config && error.response && error.response.status === 403) {
 			if (error.config.retries && error.config.retries > 5)
 				return Promise.reject(error);
 			if (typeof error.config.retries == "undefined")
 				error.config.retries = 0;
 			error.config.retries++;
-			recreateSession(session);
+			await recreateSession(session);
 			error.config.headers.cookie = session.cookie;
 			return axios.request(error.config);
 		}
@@ -76,51 +77,46 @@ async function init()
 		if (!saveSession) {
 			session.dont_save_session = true;
 		}
-		recreateSession(session);
+		await recreateSession(session);
 		term.clear();
 	}
 
 	term('\n\n');
-	term.drawImage( __dirname + "/../assets/logo.png", { shrink: { width, height: 30 } }, async () => {
-		term("\n");
-		const info = "epiterm " + pkg.version + " - " + pkg.author;
-		const spacesCount = (width - info.length) / 2;
-		term((spacesCount > 0 ? " ".repeat(spacesCount) : "") + info);
-		term("\n\n")
-		term('Utilisez les flèches et appuyez sur Entrer pour sélectionner un onglet. Appuyez sur Échap pour quitter.');
-		while (true)
-			await loadMenu(session, state);
-	});
-
+	await logo(width);
+	term("\n");
+	const info = "epiterm " + pkg.version + " - " + pkg.author;
+	const spacesCount = (width - info.length) / 2;
+	term((spacesCount > 0 ? " ".repeat(spacesCount) : "") + info);
+	term("\n\n");
+	term('Utilisez les flèches et appuyez sur Entrer pour sélectionner un onglet. Appuyez sur Échap pour quitter.');
+	while (true)
+		await loadMenu(session, state);
 }
 
 async function loadMenu(session, state)
 {
 	const pagesTitles = Object.keys(pages);
-	return new Promise<void>((resolve, reject) => {
-		term.grabInput({ mouse: 'button' });
-		options.selectedIndex = pagesTitles.indexOf(state.page);
-		if (options.selectedIndex < 0)
-			options.selectedIndex = 0;
-		term.singleLineMenu(pagesTitles, options, async (error, response) => {
-			if (typeof response.unexpectedKey != 'undefined') {
-				if (typeof state.onKeyPress != 'undefined')
-					await state.onKeyPress(response.unexpectedKey);
-				resolve();
-				return;
-			}
-			term.clear();
-			if (error)
-				reject(error);
-			if (response.selectedText == undefined) {
-				term.processExit();
-				return;
-			}
-			const pageName = response.selectedText;
-			state.page = pageName;
-			loadPage(pages[pageName], session, state).then(r => resolve());
-		});
-	});
+	term.grabInput({ mouse: 'button' });
+	options.selectedIndex = pagesTitles.indexOf(state.page);
+	if (options.selectedIndex < 0)
+		options.selectedIndex = 0;
+	const response = await term.singleLineMenu(pagesTitles, options).promise;
+	if (typeof response.unexpectedKey != 'undefined') {
+		if (typeof state.onKeyPress != 'undefined')
+			await state.onKeyPress(response.unexpectedKey);
+		return;
+	}
+	term.clear();
+	if (response.selectedText == undefined) {
+		term.processExit();
+		return;
+	}
+	const pageName = response.selectedText;
+	state.page = pageName;
+	return loadPage(pages[pageName], session, state);
 }
 
-init();
+init().catch(err => {
+	console.error("A fatal error occured.");
+	console.error(err);
+});
