@@ -83,7 +83,7 @@ export async function displayProject(session: Session, state: State, projectUrl,
                 }
                 try {
                     if (isRegistered) {
-                        if (!project.user_project_master) {
+                        if (project.user_project_master === "0") {
                             showActionBarError("Cette fonctionnalité n'est pas encore disponible. Vous devez être chef de groupe pour quitter un groupe.");
                             return;
                         }
