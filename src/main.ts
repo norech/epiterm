@@ -9,6 +9,8 @@ import { logs } from './pages/logs';
 import { modules } from './pages/modules';
 import { loadPage } from './state';
 import { logo } from './components/logo';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 
 const pkg = require("../package.json");
 term.fullscreen(true);
@@ -116,7 +118,25 @@ async function loadMenu(session, state)
 	return loadPage(pages[pageName], session, state);
 }
 
-init().catch(err => {
-	console.error("A fatal error occured.");
-	console.error(err);
+init().catch(async (err) => {
+	term.clear();
+	term.error.red("Une erreur fatale s'est produite.\n" + err);
+	term.error.red("\n");
+
+	term.error.green.bold("Voulez-vous créer un fichier error.log avec des détails sur cette erreur? (y/N)");
+	const createFile = await term.yesOrNo( { yes: [ 'y', 'Y' ] , no: [ 'n', 'N', 'ENTER' ] }).promise;
+
+	if (!createFile) {
+		term.processExit(131);
+		return;
+	}
+	
+	term.error.red("\n");
+	try {
+		writeFileSync(join(process.cwd(), "error.log"), JSON.stringify(err, undefined, 4));
+		term.error.red("Le fichier error.log à été écrit.");
+	} catch (ex) {
+		term.error.red("Impossible d'écrire le fichier: " + ex);
+	}
+	term.processExit(131);
 });

@@ -26,15 +26,15 @@ export async function getSession(): Promise<Session>
 
     if (typeof session.user === "undefined"
         || session.user.last_refresh > 60 * 60 * 1000)
-            refreshSessionCachedUserInfos(session);
+            await refreshSessionCachedUserInfos(session);
     return (session);
 }
 
 export async function recreateSession(session: Session)
 {
     session.cookie = await authAutologin(session.autologin_link);
-    refreshSessionCachedUserInfos(session);
-    saveSession(session);
+    await refreshSessionCachedUserInfos(session);
+    return saveSession(session);
 }
 
 export async function saveSession(session: Session)
@@ -52,5 +52,5 @@ export async function refreshSessionCachedUserInfos(session)
         location: data.location,
         internal_email: data.internal_email
     };
-    saveSession(session);
+    return saveSession(session);
 }
