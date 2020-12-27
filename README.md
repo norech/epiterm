@@ -17,6 +17,7 @@ Clonez le repo et lancez-y les commandes suivantes:
 
 ```bash
 $ npm install
+$ npm run build
 $ npm link
 ```
 
