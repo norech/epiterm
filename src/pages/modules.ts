@@ -3,6 +3,7 @@ import { clearActionBar, actionBarInput, showActionBarError } from '../component
 import { loader } from '../components/loader';
 import { getDashboard, getModules } from "../intra";
 import { Session } from '../session';
+import { State } from '../state';
 
 const showKeymap = () => {
     clearActionBar(false);
@@ -10,7 +11,7 @@ const showKeymap = () => {
     term(" Sélectionner");
 }
 
-export async function modules(session: Session, state)
+export async function modules(session: Session, state: State)
 {
     const { data } = await loader(async () => {
         let modules = await getModules(session);

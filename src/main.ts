@@ -7,7 +7,7 @@ import { profile } from './pages/profile';
 import { planning } from './pages/planning';
 import { logs } from './pages/logs';
 import { modules } from './pages/modules';
-import { read } from 'fs';
+import { loadPage } from './state';
 
 const pkg = require("../package.json");
 term.fullscreen(true);
@@ -111,10 +111,9 @@ async function loadMenu(session, state)
 				term.processExit();
 				return;
 			}
-			state.page = response.selectedText;
-			state.onKeyPress = undefined;
-			term.grabInput(false);
-			pages[state.page](session, state).then(r => resolve());
+			const pageName = response.selectedText;
+			state.page = pageName;
+			loadPage(pages[pageName], session, state).then(r => resolve());
 		});
 	});
 }

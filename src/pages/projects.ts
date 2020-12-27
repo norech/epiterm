@@ -4,6 +4,7 @@ import { loader } from '../components/loader';
 import { getDashboard, get } from "../intra";
 import { Session } from '../session';
 import { actionBarInput, clearActionBar, showActionBarError } from '../components/actionBar';
+import { State } from '../state';
 
 const showKeymap = () => {
     clearActionBar(false);
@@ -11,7 +12,7 @@ const showKeymap = () => {
     term(" Sélectionner");
 }
 
-export async function projects(session: Session, state)
+export async function projects(session: Session, state: State)
 {
     const { data } = await loader(async () => {
         const dashboard = await getDashboard(session);

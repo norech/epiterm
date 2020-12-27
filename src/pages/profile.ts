@@ -2,8 +2,9 @@ import { terminal as term } from  'terminal-kit' ;
 import { loader } from '../components/loader';
 import { getUser } from "../intra";
 import { Session } from '../session';
+import { State } from '../state';
 
-export async function profile(session: Session, state)
+export async function profile(session: Session, state: State)
 {
     const { data } = await loader(() => getUser(session));
     
