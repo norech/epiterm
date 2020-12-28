@@ -11,6 +11,7 @@ import { loadPage } from './state';
 import { logo } from './components/logo';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
+import { loader } from './components/loader';
 
 const pkg = require("../package.json");
 term.fullscreen(true);
@@ -36,7 +37,7 @@ var pages = {
 
 async function init()
 {
-	const session = await getSession();
+	const session = await loader(() => getSession(), " Authentification... ");
 
 	axios.interceptors.response.use(null, async (error) => {
 		if (error.config && error.response && error.response.status === 403) {
@@ -79,7 +80,7 @@ async function init()
 		if (!saveSession) {
 			session.dont_save_session = true;
 		}
-		await recreateSession(session);
+		await loader(() => recreateSession(session), " Authentification... ");
 		term.clear();
 	}
 
