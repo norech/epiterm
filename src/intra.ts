@@ -11,7 +11,7 @@ export async function authAutologin(autologinLink)
         maxRedirects: 0,
         headers: { 'Accept': '*/*' },
         withCredentials: true
-    });
+    }).catch(err => err); // 302
     const cookies = res.response.headers['set-cookie'];
     
     return(cookies.filter(c => c.indexOf("user") == 0)[0]);
