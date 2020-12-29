@@ -35,7 +35,7 @@ export async function planning(session: Session, state: State) {
             if (activity.room) {
                 const roomParts = activity.room.code.split("/");
                 roomParts.splice(0, 2);
-                room = roomParts.join(" - ") + " (" + activity.room.seats + ")";
+                room = roomParts.join(" - ") + " (" + activity.total_students_registered + "/" + activity.room.seats + ")";
             }
             return [ day, registered, start.format("HH:mm"), end.format("HH:mm"), activity.titlemodule, activity.acti_title + rdv_suffix, room ]
         })
