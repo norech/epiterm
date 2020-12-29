@@ -14,7 +14,7 @@ export async function planning(session: Session, state: State) {
 
         if (typeof session.ignored_modules_from_planning === "undefined")
             session.ignored_modules_from_planning = [];
-        return (planning.data.filter((p) => p.instance_location === session.user.location && !session.ignored_modules_from_planning.includes(p.titlemodule)).sort((pa, pb) => moment(pa.start).diff(pb.start)));
+        return (planning.data.filter((p) => p.semester === session.user.semester && p.instance_location === session.user.location && !session.ignored_modules_from_planning.includes(p.titlemodule)).sort((pa, pb) => moment(pa.start).diff(pb.start)));
     });
 
     term.table([

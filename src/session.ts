@@ -12,6 +12,7 @@ export interface Session {
         login: string;
         location: string;
         internal_email: string;
+        semester?: number;
     };
     dont_save_session?: boolean;
     ignored_modules_from_planning?: string[];
@@ -50,7 +51,8 @@ export async function refreshSessionCachedUserInfos(session)
         last_refresh: Date.now(),
         login: data.login,
         location: data.location,
-        internal_email: data.internal_email
+        internal_email: data.internal_email,
+        semester: data.semester
     };
     return saveSession(session);
 }
