@@ -21,16 +21,23 @@ export async function planning(session: Session, state: State) {
         [ 'Date', 'Inscrit', 'Heure de début', 'Heure de fin', 'Module', 'Activité', 'Salle' ],
         ...activities.map(activity => {
             const rdv_suffix = activity.is_rdv == "1" ? " ^b(rendez-vous)" : "";
-            let start = moment(activity.start);
+            const start = moment(activity.start);
+            const end = moment(activity.end);
+            const day = start.calendar(null, { nextWeek: "dddd DD MMMM YYYY", sameElse: "dddd DD MMMM YYYY" });
             let rdv = activity.rdv_indiv_registered;
-            let color_before_date = "";
             if (rdv) {
                 const [rdv_start] = rdv.split('|');
                 const [_, hour] = rdv_start.split(' ');
                 rdv = "^yRDV À " + hour.slice(0, -3);
             }
             const registered = !activity.module_registered ? "^rNON INSCRIT!" : (activity.is_rdv ? (activity.rdv_indiv_registered ? rdv : "^bRDV À PRENDRE!") : "^gINSCRIT");
-            return [ start.calendar(null, { nextWeek: "dddd DD MMMM YYYY" }), registered, color_before_date + start.format("HH:mm"), moment(activity.end).format("HH:mm"), activity.titlemodule, activity.acti_title + rdv_suffix, activity.room?.code ]
+            let room = "^wNon spécifiée";
+            if (activity.room) {
+                const roomParts = activity.room.code.split("/");
+                roomParts.splice(0, 2);
+                room = roomParts.join(" - ") + " (" + activity.room.seats + ")";
+            }
+            return [ day, registered, start.format("HH:mm"), end.format("HH:mm"), activity.titlemodule, activity.acti_title + rdv_suffix, room ]
         })
     ], {
         hasBorder: false,
