@@ -30,7 +30,7 @@ export async function planning(session: Session, state: State) {
                 const [_, hour] = rdv_start.split(' ');
                 rdv = "^yRDV À " + hour.slice(0, -3);
             }
-            const registered = !activity.module_registered ? "^rNON INSCRIT!" : (activity.is_rdv ? (activity.rdv_indiv_registered ? rdv : "^bRDV À PRENDRE!") : "^gINSCRIT");
+            const registered = activity.event_registered != 'registered' ? "^rNON INSCRIT!" : (activity.is_rdv == '1' ? (activity.rdv_indiv_registered || activity.rdv_group_registered ? rdv : "^bRDV À PRENDRE!") : "^gINSCRIT");
             let room = "^wNon spécifiée";
             if (activity.room) {
                 const roomParts = activity.room.code.split("/");
