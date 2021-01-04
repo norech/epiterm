@@ -27,7 +27,7 @@ export async function getSession(): Promise<Session>
 
     if (typeof session.user === "undefined"
         || session.user.last_refresh > 60 * 60 * 1000)
-            await refreshSessionCachedUserInfos(session);
+            await refreshSessionCachedUserInfos(session).catch(err => err); // ignore error
     return (session);
 }
 

@@ -41,8 +41,10 @@ async function init()
 
 	axios.interceptors.response.use(null, async (error) => {
 		if (error.config && error.response && error.response.status === 403) {
-			if (error.config.retries && error.config.retries > 5)
+			if (error.config.retries && error.config.retries > 5) {
+				error.message += " - after 5 retries";
 				return Promise.reject(error);
+			}
 			if (typeof error.config.retries == "undefined")
 				error.config.retries = 0;
 			error.config.retries++;
