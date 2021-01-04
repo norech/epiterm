@@ -24,13 +24,24 @@ export async function planning(session: Session, state: State) {
             const start = moment(activity.start);
             const end = moment(activity.end);
             const day = start.calendar(null, { nextWeek: "dddd DD MMMM YYYY", sameElse: "dddd DD MMMM YYYY" });
-            let rdv = activity.rdv_indiv_registered;
+            let rdv = activity.rdv_indiv_registered || activity.rdv_group_registered;
             if (rdv) {
                 const [rdv_start] = rdv.split('|');
                 const [_, hour] = rdv_start.split(' ');
                 rdv = "^yRDV À " + hour.slice(0, -3);
             }
-            const registered = activity.event_registered != 'registered' ? "^rNON INSCRIT!" : (activity.is_rdv == '1' ? (activity.rdv_indiv_registered || activity.rdv_group_registered ? rdv : "^bRDV À PRENDRE!") : "^gINSCRIT");
+            let registered = "";
+            if (activity.event_registered == false) {
+                registered = "^rNON INSCRIT!";
+            } else if (activity.is_rdv == '1') {
+                registered = (activity.rdv_indiv_registered || activity.rdv_group_registered) ? rdv : "^bRDV À PRENDRE!";
+            } else if (activity.event_registered == "present") {
+                registered = "^gPRÉSENT";
+            } else if (activity.event_registered == "absent") {
+                registered = "^yABSENT";
+            } else {
+                registered = "^gINSCRIT";
+            }
             let room = "^wNon spécifiée";
             if (activity.room) {
                 const roomParts = activity.room.code.split("/");
