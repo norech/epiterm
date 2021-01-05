@@ -7,10 +7,10 @@ import { State } from '../state';
 
 export async function planning(session: Session, state: State) {
     const activities = await loader(async () => {
-        const today = new Date()
-        const later = new Date(today)
-        later.setDate(later.getDate() + 7)
-        const planning = await getPlanning(session, today.toISOString().split('T')[0], later.toISOString().split('T')[0]);
+        const today = new Date();
+        const later = new Date(today);
+        later.setDate(later.getDate() + 7);
+        const planning = await getPlanning(session, today, later);
 
         if (typeof session.ignored_modules_from_planning === "undefined")
             session.ignored_modules_from_planning = [];
