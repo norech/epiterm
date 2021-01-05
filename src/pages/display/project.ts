@@ -14,6 +14,51 @@ const showKeymap = (isRegistered) => (
     ])
 );
 
+const showFiles = async (session: Session, state: State, projectUrl: string) => {
+    try {
+        const files = await loader(() => get(session, projectUrl + "file/"));
+        await loadPage(displayFiles, session, state, files.data);
+    } catch (ex) {
+        showActionBarError("Impossible de charger les fichiers: " + ex);
+    }
+}
+
+const switchRegister = async (session: Session, state: State, isRegistered: boolean, projectUrl: string, project, activity) => {
+    if (project.closed) {
+        showActionBarError("Les inscriptions sont fermées pour ce projet.");
+        return;
+    }
+    const actionTitle = isRegistered ? "désinscrire" : "inscrire";
+
+    const doContinue = await actionBarYN({
+        label: "Voulez-vous vraiment vous " + actionTitle + " à ce projet ? (y/N)",
+        ynFieldOptions: { yes: [ 'y', 'Y' ] , no: [ 'n', 'N', 'ENTER' ] }
+    });
+    if (!doContinue) {
+        showActionBarError("Action annulée.");
+        showKeymap(isRegistered);
+        return;
+    }
+    try {
+        if (isRegistered) {
+            if (project.user_project_master === "0") {
+                showActionBarError("Cette fonctionnalité n'est pas encore disponible. Vous devez être chef de groupe pour quitter un groupe.");
+                return;
+            }
+            showActionBarInfo("Destruction du groupe...");
+            await post(session, projectUrl + "destroygroup", { code: project.user_project_code });
+        } else {
+            showActionBarInfo("Inscription au projet...");
+            await post(session, projectUrl + "register/");
+        }
+    } catch (ex) {
+        showActionBarError("Impossible de vous " + actionTitle + ": " + ex);
+        showKeymap(isRegistered);
+        return;
+    }
+    return loadPage(displayProject, session, state, projectUrl, activity);
+};
+
 export async function displayProject(session: Session, state: State, projectUrl, activity)
 {
     const { data: project } = await loader(() => get(session, projectUrl));
@@ -56,48 +101,9 @@ export async function displayProject(session: Session, state: State, projectUrl,
 
         switch (key.toLowerCase()) {
             case "f":
-                try {
-                    const files = await loader(() => get(session, projectUrl + "file/"));
-                    await loadPage(displayFiles, session, state, files.data);
-                } catch (ex) {
-                    showActionBarError("Impossible de charger les fichiers: " + ex);
-                }
-                break;
+                return showFiles(session, state, projectUrl);
             case "r":
-                if (project.closed) {
-                    showActionBarError("Les inscriptions sont fermées pour ce projet.");
-                    return;
-                }
-                const actionTitle = isRegistered ? "désinscrire" : "inscrire";
-
-
-                const doContinue = await actionBarYN({
-                    label: "Voulez-vous vraiment vous " + actionTitle + " à ce projet ? (y/N)",
-                    ynFieldOptions: { yes: [ 'y', 'Y' ] , no: [ 'n', 'N', 'ENTER' ] }
-                });
-                if (!doContinue) {
-                    showActionBarError("Action annulée.");
-                    showKeymap(isRegistered);
-                    break;
-                }
-                try {
-                    if (isRegistered) {
-                        if (project.user_project_master === "0") {
-                            showActionBarError("Cette fonctionnalité n'est pas encore disponible. Vous devez être chef de groupe pour quitter un groupe.");
-                            return;
-                        }
-                        showActionBarInfo("Destruction du groupe...");
-                        await post(session, projectUrl + "destroygroup", { code: project.user_project_code });
-                    } else {
-                        showActionBarInfo("Inscription au projet...");
-                        await post(session, projectUrl + "register/");
-                    }
-                } catch (ex) {
-                    showActionBarError("Impossible de vous " + actionTitle + ": " + ex);
-                    showKeymap(isRegistered);
-                    return;
-                }
-                return loadPage(displayProject, session, state, projectUrl, activity);
+                return switchRegister(session, state, isRegistered, projectUrl, project, activity);
         }
 
     };

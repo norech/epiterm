@@ -13,6 +13,37 @@ const showKeymap = () => (
     ])
 );
 
+const select = async (session: Session, state: State, projects) => {
+    const projectNames = projects.map(projet => projet.title);
+
+    const input = await actionBarInput({
+        label: "Sélectionner un projet: ", 
+        inputFieldOptions: {
+            cancelable: true,
+            autoCompleteMenu: true,
+            history: projectNames,
+            autoComplete: projectNames,
+            autoCompleteHint: true
+        },
+        validate: async (input) => {
+            const valid = projectNames.includes(input);
+            if (!valid)
+                showActionBarError("Le projet '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+            return (valid);
+        }
+    });
+
+    if (input == undefined) {
+        showKeymap();
+        return;
+    }
+    const project = projects.find(p => p.title == input);
+
+    const { data: activity } = await loader(() => get(session, project.title_link));
+
+    return loadPage(displayProject, session, state, project.title_link + "project/", activity);
+};
+
 export async function projects(session: Session, state: State)
 {
     const { data } = await loader(async () => {
@@ -70,36 +101,9 @@ export async function projects(session: Session, state: State)
     } );
     showKeymap();
 
-    const projectNames = projects.map(projet => projet.title);
-
     state.onKeyPress = async (key) => {
         if (key.toLowerCase() != "s") return;
 
-        const input = await actionBarInput({
-            label: "Sélectionner un projet: ", 
-            inputFieldOptions: {
-                cancelable: true,
-                autoCompleteMenu: true,
-                history: projectNames,
-                autoComplete: projectNames,
-                autoCompleteHint: true
-            },
-            validate: async (input) => {
-                const valid = projectNames.includes(input);
-                if (!valid)
-                    showActionBarError("Le projet '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
-                return (valid);
-            }
-        });
-
-        if (input == undefined) {
-            showKeymap();
-            return;
-        }
-        const project = projects.find(p => p.title == input);
-
-        const { data: activity } = await loader(() => get(session, project.title_link));
-
-        return loadPage(displayProject, session, state, project.title_link + "project/", activity);
+        return select(session, state, projects);
     };
 }

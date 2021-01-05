@@ -1,5 +1,5 @@
 import { terminal as term } from  'terminal-kit' ;
-import { clearActionBar, actionBarInput, showActionBarError, actionBarKeymap } from '../components/actionBar';
+import { actionBarInput, showActionBarError, actionBarKeymap } from '../components/actionBar';
 import { loader } from '../components/loader';
 import { getDashboard, getModules } from "../intra";
 import { Session } from '../session';
@@ -11,9 +11,36 @@ const showKeymap = () => (
     ])
 );
 
+const showModules = async (modules) => {
+    const moduleNames = modules.map(module => module.title);
+
+    const input = await actionBarInput({
+        label: "Sélectionner un module: ", 
+        inputFieldOptions: {
+            autoCompleteMenu: true,
+            history: moduleNames,
+            autoComplete: moduleNames,
+            autoCompleteHint: true
+        },
+        validate: async (input) => {
+            const valid = moduleNames.includes(input);
+            if (!valid)
+                showActionBarError("Le module '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+            return (valid);
+        }
+    });
+
+    if (input == undefined) {
+        showKeymap();
+        return;
+    }
+    showActionBarError("Cette fonctionnalité n'est pas encore disponible.");
+    showKeymap();
+};
+
 export async function modules(session: Session, state: State)
 {
-    const { data } = await loader(async () => {
+    const { data: modules } = await loader(async () => {
         let modules = await getModules(session);
         let dashboard = await getDashboard(session);
         let promises = [];
@@ -33,7 +60,7 @@ export async function modules(session: Session, state: State)
 
     term.table([
         [ 'Module ', 'Grade', 'État ', 'Fin d\'inscription ', 'Début ', 'Fin ', 'Crédits' ],
-        ...data.map(module => {
+        ...modules.map(module => {
             let note_state = module.is_note ? " ^b⏺": "";
             note_state += module.is_projet ? " ^y⏺": "";
             let state = "^rÉCHEC";
@@ -67,32 +94,9 @@ export async function modules(session: Session, state: State)
     });
     showKeymap();
 
-    const moduleNames = data.map(module => module.title);
-
     state.onKeyPress = async (key) => {
         if (key.toLowerCase() != "s") return;
 
-        const input = await actionBarInput({
-            label: "Sélectionner un module: ", 
-            inputFieldOptions: {
-                autoCompleteMenu: true,
-                history: moduleNames,
-                autoComplete: moduleNames,
-                autoCompleteHint: true
-            },
-            validate: async (input) => {
-                const valid = moduleNames.includes(input);
-                if (!valid)
-                    showActionBarError("Le module '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
-                return (valid);
-            }
-        });
-
-        if (input == undefined) {
-            showKeymap();
-            return;
-        }
-        showActionBarError("Cette fonctionnalité n'est pas encore disponible.");
-        showKeymap();
+        showModules(modules);
     };
 }

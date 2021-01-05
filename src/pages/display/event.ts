@@ -1,6 +1,6 @@
 import moment from "moment";
 import { terminal as term } from  'terminal-kit' ;
-import { actionBarKeymap, showActionBarError, showActionBarInfo } from '../../components/actionBar';
+import { actionBarKeymap, actionBarYN, showActionBarError, showActionBarInfo } from '../../components/actionBar';
 import { loader } from '../../components/loader';
 import { get, post } from '../../intra';
 import { Session } from '../../session';
@@ -14,6 +14,45 @@ const showKeymap = (isRegistered) => (
     ])
 );
 
+const switchRegister = async (session, state, eventLink: string, isRegistered: boolean, planningEvent) => {
+    const actionTitle = isRegistered ? "désinscrire" : "inscrire";
+
+    const doContinue = await actionBarYN({
+        label: "Voulez-vous vraiment vous " + actionTitle + " à ce projet ? (y/N)",
+        ynFieldOptions: { yes: [ 'y', 'Y' ] , no: [ 'n', 'N', 'ENTER' ] }
+    });
+    if (!doContinue) {
+        showActionBarError("Action annulée.");
+        showKeymap(isRegistered);
+        return;
+    }
+    if (!planningEvent.module_registered) {
+        showActionBarError("Vous n'êtes pas incrit au module lié à de cette activité.");
+        return;
+    }
+    if (!planningEvent.allow_register) {
+        showActionBarError("Les inscriptions sont fermées pour cette activité.");
+        return;
+    }
+    if (moment(planningEvent.begin).diff(null, "hours") < 24) {
+        showActionBarError("Vous ne pouvez pas vous inscrire à une activité qui a lieu dans moins de 24h.");
+        return;
+    }
+
+    try {
+        if (!isRegistered) {
+            showActionBarInfo("Inscription à l'activité...");
+            await post(session, eventLink + "register")
+        } else {
+            showActionBarInfo("Désinscription à l'activité...");
+            await post(session, eventLink + "unregister")
+        }
+        return loadPage(displayEvent, session, state, planningEvent);
+    } catch (ex) {
+        showActionBarError("Impossible de vous " + actionTitle + ": " + ex);
+    }
+};
+
 export async function displayEvent(session: Session, state: State, planningEvent)
 {
     const eventLink = "/module/" + planningEvent.scolaryear + "/" + planningEvent.codemodule + "/" + planningEvent.codeinstance + "/" + planningEvent.codeacti + "/" + planningEvent.codeevent + "/";
@@ -25,17 +64,6 @@ export async function displayEvent(session: Session, state: State, planningEvent
     event.overview = activity.events.find(e => e.code == event.codeevent);
 
     const isRegistered = event.overview.already_register != null;
-
-    let registered = "";
-    if (event.overview.user_status == false) {
-        registered = "^rNON INSCRIT!";
-    } else if (event.overview.user_status == "present") {
-        registered = "^gPRÉSENT";
-    } else if (event.overview.user_status == "absent") {
-        registered = "^yABSENT";
-    } else {
-        registered = "^gINSCRIT";
-    }
 
     let room = "^wNon spécifiée";
     if (event.room && event.room.code) {
@@ -76,32 +104,7 @@ export async function displayEvent(session: Session, state: State, planningEvent
             case "p":
                 return loadPage(displayProject, session, state, activityLink + "project/", activity);
             case "r":
-                if (!planningEvent.module_registered) {
-                    showActionBarError("Vous n'êtes pas incrit au module lié à de cette activité.");
-                    return;
-                }
-                if (!planningEvent.allow_register) {
-                    showActionBarError("Les inscriptions sont fermées pour cette activité.");
-                    return;
-                }
-                if (moment(event.begin).diff(null, "hours") < 24) {
-                    showActionBarError("Vous ne pouvez pas vous inscrire à une activité qui a lieu dans moins de 24h.");
-                    return;
-                }
-
-                const actionTitle = isRegistered ? "désinscrire" : "inscrire";
-                try {
-                    if (!isRegistered) {
-                        showActionBarInfo("Inscription à l'activité...");
-                        await post(session, eventLink + "register")
-                    } else {
-                        showActionBarInfo("Désinscription à l'activité...");
-                        await post(session, eventLink + "unregister")
-                    }
-                    return loadPage(displayEvent, session, state, planningEvent);
-                } catch (ex) {
-                    showActionBarError("Impossible de vous " + actionTitle + ": " + ex);
-                }
+                return switchRegister(session, state, eventLink, isRegistered, planningEvent);
         }
 
     };
