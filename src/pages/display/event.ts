@@ -75,9 +75,10 @@ export async function displayEvent(session: Session, state: State, eventUrl: str
                 return loadPage(displayProject, session, state, activityLink + "project/", activity);
             case "r":
                 if (!isRegistered)
-                    post(session, eventUrl + "register/")
+                    await post(session, eventUrl + "register/")
                 else
-                    post(session, eventUrl + "unregister/")
+                    await post(session, eventUrl + "unregister/")
+                return loadPage(displayEvent, session, state, eventUrl);
         }
 
     };
