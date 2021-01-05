@@ -1,6 +1,6 @@
-import { stringify } from 'querystring';
+import moment from "moment";
 import { terminal as term } from  'terminal-kit' ;
-import { actionBarKeymap } from '../../components/actionBar';
+import { actionBarKeymap, showActionBarError, showActionBarInfo } from '../../components/actionBar';
 import { loader } from '../../components/loader';
 import { get, post } from '../../intra';
 import { Session } from '../../session';
@@ -14,15 +14,17 @@ const showKeymap = (isRegistered) => (
     ])
 );
 
-export async function displayEvent(session: Session, state: State, eventUrl: string)
+export async function displayEvent(session: Session, state: State, planningEvent)
 {
-    const { data: event } = await loader(() => get(session, eventUrl));
+    const eventLink = "/module/" + planningEvent.scolaryear + "/" + planningEvent.codemodule + "/" + planningEvent.codeinstance + "/" + planningEvent.codeacti + "/" + planningEvent.codeevent + "/";
+
+    const { data: event } = await loader(() => get(session, eventLink));
     const activityLink = "/module/" + event.scolaryear + "/" + event.codemodule + "/" + event.codeinstance + "/" + event.codeacti + "/";
 
     const { data: activity } = await loader(() => get(session, activityLink));
     event.overview = activity.events.find(e => e.code == event.codeevent);
 
-    const isRegistered = event.overview.user_status != null;
+    const isRegistered = event.overview.already_register != null;
 
     let registered = "";
     if (event.overview.user_status == false) {
@@ -74,11 +76,32 @@ export async function displayEvent(session: Session, state: State, eventUrl: str
             case "p":
                 return loadPage(displayProject, session, state, activityLink + "project/", activity);
             case "r":
-                if (!isRegistered)
-                    await post(session, eventUrl + "register/")
-                else
-                    await post(session, eventUrl + "unregister/")
-                return loadPage(displayEvent, session, state, eventUrl);
+                if (!planningEvent.module_registered) {
+                    showActionBarError("Vous n'êtes pas incrit au module lié à de cette activité.");
+                    return;
+                }
+                if (!planningEvent.allow_register) {
+                    showActionBarError("Les inscriptions sont fermées pour cette activité.");
+                    return;
+                }
+                if (moment(event.begin).diff(null, "hours") < 24) {
+                    showActionBarError("Vous ne pouvez pas vous inscrire à une activité qui a lieu dans moins de 24h.");
+                    return;
+                }
+
+                const actionTitle = isRegistered ? "désinscrire" : "inscrire";
+                try {
+                    if (!isRegistered) {
+                        showActionBarInfo("Inscription à l'activité...");
+                        await post(session, eventLink + "register")
+                    } else {
+                        showActionBarInfo("Désinscription à l'activité...");
+                        await post(session, eventLink + "unregister")
+                    }
+                    return loadPage(displayEvent, session, state, planningEvent);
+                } catch (ex) {
+                    showActionBarError("Impossible de vous " + actionTitle + ": " + ex);
+                }
         }
 
     };

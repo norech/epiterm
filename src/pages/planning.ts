@@ -50,9 +50,7 @@ const select = async (session: Session, state: State, activities) => {
         event = events[input.selectedIndex];
     }
 
-    const eventLink = "/module/" + event.scolaryear + "/" + event.codemodule + "/" + event.codeinstance + "/" + event.codeacti + "/" + event.codeevent + "/";
-
-    return loadPage(displayEvent, session, state, eventLink);
+    return loadPage(displayEvent, session, state, event);
 };
 
 export async function planning(session: Session, state: State, date?: moment.MomentInput) {
