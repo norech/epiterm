@@ -5,12 +5,11 @@ import moment from 'moment';
 import { Session } from '../session';
 import { State } from '../state';
 
-export async function planning(session: Session, state: State) {
+export async function planning(session: Session, state: State, date?: moment.MomentInput) {
     const activities = await loader(async () => {
-        const today = new Date();
-        const later = new Date(today);
-        later.setDate(later.getDate() + 7);
-        const planning = await getPlanning(session, today, later);
+        const start = moment(date).toDate();
+        const end = moment(start).add(7, "days").toDate();
+        const planning = await getPlanning(session, start, end);
 
         if (typeof session.ignored_modules_from_planning === "undefined")
             session.ignored_modules_from_planning = [];
