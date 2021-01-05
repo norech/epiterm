@@ -43,7 +43,7 @@ export async function planning(session: Session, state: State) {
                 registered = "^gINSCRIT";
             }
             let room = "^wNon spécifiée";
-            if (activity.room) {
+            if (activity.room && activity.room.code) {
                 const roomParts = activity.room.code.split("/");
                 roomParts.splice(0, 2);
                 room = roomParts.join(" - ") + " (" + activity.total_students_registered + "/" + activity.room.seats + ")";
