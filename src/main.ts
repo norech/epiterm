@@ -64,7 +64,7 @@ async function init()
 
 	term.on('key' , (name, matches, data) => {
 		if (name == "CTRL_C") {
-			term.processExit();
+			term.grabInput(false, true).then(() => term.processExit());
 		}
     });
 
@@ -113,7 +113,7 @@ async function loadMenu(session, state)
 	}
 	term.clear();
 	if (response.selectedText == undefined) {
-		term.processExit();
+		await term.grabInput(false, true).then(() => term.processExit());
 		return;
 	}
 	const pageName = response.selectedText;
