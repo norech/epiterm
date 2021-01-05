@@ -3,12 +3,20 @@ import { loader } from '../components/loader';
 import { getPlanning, getUser } from "../intra";
 import moment from 'moment';
 import { Session } from '../session';
-import { State } from '../state';
+import { loadPage, State } from '../state';
+import { actionBarChoice, actionBarInput, actionBarKeymap, showActionBarError } from '../components/actionBar';
+
+const showKeymap = () => (
+    actionBarKeymap([
+        { key: "b", desc: "Semaine préc." },
+        { key: "n", desc: "Semaine suiv." },
+    ])
+);
 
 export async function planning(session: Session, state: State, date?: moment.MomentInput) {
+    const start = moment(date).toDate();
+    const end = moment(start).add(7, "days").toDate();
     const activities = await loader(async () => {
-        const start = moment(date).toDate();
-        const end = moment(start).add(7, "days").toDate();
         const planning = await getPlanning(session, start, end);
 
         if (typeof session.ignored_modules_from_planning === "undefined")
@@ -62,4 +70,15 @@ export async function planning(session: Session, state: State, date?: moment.Mom
         x: 0,
         fit: true
     });
+
+    showKeymap();
+
+    state.onKeyPress = async (key) => {
+        switch (key.toLowerCase()) {
+            case "b":
+                return loadPage(planning, session, state, moment(start).subtract(7, "days"));
+            case "n":
+                return loadPage(planning, session, state, moment(start).add(7, "days"));
+        }
+    };
 }
