@@ -21,7 +21,7 @@ export interface ActionBarInputOptions {
 }
 
 export async function actionBarInput(options: ActionBarInputOptions) {
-    let input: string;        
+    let input: string;
     term.eraseArea(1, term.height - 1, term.width, 2);
     while (true) {
         term.moveTo(2, term.height - 1, options.label);
@@ -36,6 +36,27 @@ export async function actionBarInput(options: ActionBarInputOptions) {
         if (await options.validate(input)) {
             break;
         }
+    }
+    return (input);
+}
+
+export interface ActionBarChoiceOptions {
+    label: string;
+    singleLineOptions?: any;
+    choices: string[];
+}
+
+export async function actionBarChoice(options: ActionBarChoiceOptions) {
+    let input;        
+    term.eraseArea(1, term.height - 1, term.width, 2);
+    term.moveTo(2, term.height - 1, options.label);
+    input = await term.singleLineMenu(options.choices, {
+        y: term.height,
+        ...options.singleLineOptions
+    }).promise;
+    term.eraseArea(1, term.height - 1, term.width, 2);
+    if (input == undefined) { // esc is pressed
+        return (undefined);
     }
     return (input);
 }
