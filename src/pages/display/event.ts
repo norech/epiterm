@@ -72,7 +72,12 @@ export async function displayEvent(session: Session, state: State, eventUrl: str
 
         switch (key.toLowerCase()) {
             case "p":
-                return loadPage(displayProject, session, state, activityLink + "project/", activity);;
+                return loadPage(displayProject, session, state, activityLink + "project/", activity);
+            case "r":
+                if (!isRegistered)
+                    post(session, eventUrl + "register/")
+                else
+                    post(session, eventUrl + "unregister/")
         }
 
     };
