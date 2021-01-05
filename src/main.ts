@@ -136,7 +136,11 @@ init().catch(async (err) => {
 	
 	term.error.red("\n");
 	try {
-		writeFileSync(join(process.cwd(), "error.log"), JSON.stringify(err, undefined, 4));
+		let content = "";
+		if (err instanceof Error)
+			content = err.name + ": " + err.message + "\n\n" + err.stack + "\n\n";
+		content += JSON.stringify(err, undefined, 4);	
+		writeFileSync(join(process.cwd(), "error.log"), content);
 		term.error.red("Le fichier error.log à été écrit.");
 	} catch (ex) {
 		term.error.red("Impossible d'écrire le fichier: " + ex);
