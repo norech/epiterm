@@ -52,3 +52,13 @@ export async function actionBarYN(options: ActionBarYNOptions) {
     term.eraseArea(1, term.height - 1, term.width, 2);
     return (value);
 }
+
+export function actionBarKeymap(keymap: Array<{ key: string, desc: string }>) {
+    clearActionBar(false);
+    for (let i = 0; i < keymap.length; i++) {
+        const binding = keymap[i];
+
+        term.bgWhite.black.moveTo(2 + 22 * i, term.height - 1, binding.key.toUpperCase());
+        term(" " + binding.desc);
+    }
+}

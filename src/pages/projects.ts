@@ -3,15 +3,15 @@ import { staticProgress } from '../components/staticProgress';
 import { loader } from '../components/loader';
 import { getDashboard, get } from "../intra";
 import { Session } from '../session';
-import { actionBarInput, clearActionBar, showActionBarError } from '../components/actionBar';
+import { actionBarInput, actionBarKeymap, showActionBarError } from '../components/actionBar';
 import { loadPage, State } from '../state';
 import { displayProject } from './display/project';
 
-const showKeymap = () => {
-    clearActionBar(false);
-    term.bgWhite.black.moveTo(2, term.height - 1, "S");
-    term(" Sélectionner");
-}
+const showKeymap = () => (
+    actionBarKeymap([
+        { key: "s", desc: "Sélectionner" }
+    ])
+);
 
 export async function projects(session: Session, state: State)
 {

@@ -1,15 +1,15 @@
 import { terminal as term } from  'terminal-kit' ;
-import { clearActionBar, actionBarInput, showActionBarError } from '../components/actionBar';
+import { clearActionBar, actionBarInput, showActionBarError, actionBarKeymap } from '../components/actionBar';
 import { loader } from '../components/loader';
 import { getDashboard, getModules } from "../intra";
 import { Session } from '../session';
 import { loadPage, State } from '../state';
 
-const showKeymap = () => {
-    clearActionBar(false);
-    term.bgWhite.black.moveTo(2, term.height - 1, "S");
-    term(" Sélectionner");
-}
+const showKeymap = () => (
+    actionBarKeymap([
+        { key: "s", desc: "Sélectionner" }
+    ])
+);
 
 export async function modules(session: Session, state: State)
 {
