@@ -7,8 +7,9 @@ export interface State {
 }
 
 export type Page = (session: Session, state: State, ...args: any[]) => Promise<void>;
+export type GenericPage<T extends any[]> = (session: Session, state: State, ...args: T) => Promise<void>;
 
-export async function loadPage(page: Page, session: Session, state: State, ...args: any[]): Promise<void> {
+export async function loadPage<T extends any[]>(page: GenericPage<T>, session: Session, state: State, ...args: T): Promise<void> {
     term.clear();
     term.moveTo(1, 2);
 	state.onKeyPress = undefined;
