@@ -11,6 +11,7 @@ Interface interactive de terminal pour l'intranet Epitech.
  * Aperçu individuel des activités
  * Aperçu individuel des projets
  * Téléchargement des fichiers des projets
+ * Inscription et désinscription aux activités de l'emploi du temps
  * Inscription aux projets (pour l'instant limité aux groupes à une personne)
  * Désinscription aux projets (si chef de groupe uniquement)
 
