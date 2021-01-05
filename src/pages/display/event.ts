@@ -22,7 +22,7 @@ export async function displayEvent(session: Session, state: State, eventUrl: str
     const { data: activity } = await loader(() => get(session, activityLink));
     event.overview = activity.events.find(e => e.code == event.codeevent);
 
-    const isRegistered = event.overview.user_status != false;
+    const isRegistered = event.overview.user_status != null;
 
     let registered = "";
     if (event.overview.user_status == false) {
