@@ -1,19 +1,18 @@
 import { stringify } from 'querystring';
 import { terminal as term } from  'terminal-kit' ;
-import { actionBarYN, clearActionBar, showActionBarError, showActionBarInfo } from '../../components/actionBar';
+import { actionBarKeymap, actionBarYN, showActionBarError, showActionBarInfo } from '../../components/actionBar';
 import { loader } from '../../components/loader';
 import { get, post } from '../../intra';
 import { Session } from '../../session';
 import { loadPage, State } from '../../state';
 import { displayFiles } from './files';
 
-const showKeymap = (isRegistered) => {
-    clearActionBar(false);
-    term.bgWhite.black.moveTo(2, term.height - 1, "F");
-    term(" Fichiers");
-    term.bgWhite.black.moveTo(22, term.height - 1, "R");
-    term(isRegistered ? " Se désinscrire" : " S'inscrire");
-}
+const showKeymap = (isRegistered) => (
+    actionBarKeymap([
+        { key: 'f', desc: "Fichiers" },
+        { key: 'r', desc: (isRegistered ? "Se désinscrire" : "S'inscrire") },
+    ])
+);
 
 export async function displayProject(session: Session, state: State, projectUrl, activity)
 {

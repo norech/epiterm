@@ -5,13 +5,55 @@ import moment from 'moment';
 import { Session } from '../session';
 import { loadPage, State } from '../state';
 import { actionBarChoice, actionBarInput, actionBarKeymap, showActionBarError } from '../components/actionBar';
+import { displayEvent } from './display/event';
 
 const showKeymap = () => (
     actionBarKeymap([
+        { key: "s", desc: "Sélectionner" },
         { key: "b", desc: "Semaine préc." },
         { key: "n", desc: "Semaine suiv." },
     ])
 );
+
+const select = async (session: Session, state: State, activities) => {
+    const activitiesNames = activities.map(activity => activity.acti_title);
+
+    const input = await actionBarInput({
+        label: "Sélectionner une activité: ", 
+        inputFieldOptions: {
+            cancelable: true,
+            autoCompleteMenu: true,
+            history: activitiesNames,
+            autoComplete: activitiesNames,
+            autoCompleteHint: true
+        },
+        validate: async (input) => {
+            const valid = activitiesNames.includes(input);
+            if (!valid)
+                showActionBarError("L'activité '" + input + "' n'existe pas. Pensez à vérifier les majuscules. Appuyez sur TAB pour l'autocomplétion.");
+            return (valid);
+        }
+    });
+
+    if (input == undefined) {
+        showKeymap();
+        return;
+    }
+    const events = activities.filter(a => a.acti_title == input);
+
+    let event = events[0];
+    if (events.length > 1) {
+        const input = await actionBarChoice({
+            label: "Plusieurs activités ayant cet intitulé ont été trouvées. Veuillez sélectionner celle désirée.", 
+            choices: events.map(e => e.start)
+        });
+        event = events[input.selectedIndex];
+    }
+
+    const eventLink = "/module/" + event.scolaryear + "/" + event.codemodule + "/" + event.codeinstance + "/" + event.codeacti + "/" + event.codeevent + "/";
+
+    return loadPage(displayEvent, session, state, eventLink);
+};
 
 export async function planning(session: Session, state: State, date?: moment.MomentInput) {
     const start = moment(date).toDate();
@@ -79,6 +121,8 @@ export async function planning(session: Session, state: State, date?: moment.Mom
                 return loadPage(planning, session, state, moment(start).subtract(7, "days"));
             case "n":
                 return loadPage(planning, session, state, moment(start).add(7, "days"));
+            case "s":
+                return select(session, state, activities);
         }
     };
 }
