@@ -28,14 +28,17 @@ const switchRegister = async (session, state, eventLink: string, isRegistered: b
     }
     if (!planningEvent.module_registered) {
         showActionBarError("Vous n'êtes pas incrit au module lié à de cette activité.");
+        showKeymap(isRegistered);
         return;
     }
     if (!planningEvent.allow_register) {
         showActionBarError("Les inscriptions sont fermées pour cette activité.");
+        showKeymap(isRegistered);
         return;
     }
     if (moment(planningEvent.begin).diff(null, "hours") < 24) {
         showActionBarError("Vous ne pouvez pas vous inscrire à une activité qui a lieu dans moins de 24h.");
+        showKeymap(isRegistered);
         return;
     }
 
@@ -50,6 +53,7 @@ const switchRegister = async (session, state, eventLink: string, isRegistered: b
         return loadPage(displayEvent, session, state, planningEvent);
     } catch (ex) {
         showActionBarError("Impossible de vous " + actionTitle + ": " + ex);
+        showKeymap(isRegistered);
     }
 };
 
