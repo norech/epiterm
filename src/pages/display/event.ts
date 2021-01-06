@@ -31,13 +31,13 @@ const switchRegister = async (session, state, eventLink: string, isRegistered: b
         showKeymap(isRegistered);
         return;
     }
-    if (!planningEvent.allow_register) {
-        showActionBarError("Les inscriptions sont fermées pour cette activité.");
+    if (moment(planningEvent.begin).diff(moment(), "hours") < 24) {
+        showActionBarError("Vous ne pouvez pas vous inscrire à une activité qui a lieu dans moins de 24h.");
         showKeymap(isRegistered);
         return;
     }
-    if (moment(planningEvent.begin).diff(null, "hours") < 24) {
-        showActionBarError("Vous ne pouvez pas vous inscrire à une activité qui a lieu dans moins de 24h.");
+    if (!planningEvent.allow_register) {
+        showActionBarError("Les inscriptions sont fermées pour cette activité.");
         showKeymap(isRegistered);
         return;
     }
