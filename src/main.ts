@@ -64,6 +64,7 @@ async function init()
 
 	term.on('key' , (name, matches, data) => {
 		if (name == "CTRL_C") {
+			term.fullscreen(false);
 			term.grabInput(false, true).then(() => term.processExit());
 		}
     });
@@ -113,6 +114,7 @@ async function loadMenu(session, state)
 	}
 	term.clear();
 	if (response.selectedText == undefined) {
+		term.fullscreen(false);
 		await term.grabInput(false, true).then(() => term.processExit());
 		return;
 	}
@@ -130,6 +132,7 @@ init().catch(async (err) => {
 	const createFile = await term.yesOrNo( { yes: [ 'y', 'Y' ] , no: [ 'n', 'N', 'ENTER' ] }).promise;
 
 	if (!createFile) {
+		term.fullscreen(false);
 		term.processExit(131);
 		return;
 	}
